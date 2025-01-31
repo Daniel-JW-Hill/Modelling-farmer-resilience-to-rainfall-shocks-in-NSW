@@ -1,0 +1,13 @@
+name: FarmPerformanceSimulations
+title: FarmPerformanceSimulations
+username: daniel-jw-hill
+account: daniel-jw-hill
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 13556381
+bundleId: 9725769
+url: https://daniel-jw-hill.shinyapps.io/FarmPerformanceSimulations/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .gitattributes|README.md
