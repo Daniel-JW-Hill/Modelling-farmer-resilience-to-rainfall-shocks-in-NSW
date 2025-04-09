@@ -1,7 +1,8 @@
 
 # Saves summary data frame. 
 
-getSummaryCentral = function(central_simulation, 
+getSummaryCentral = function(yrs,
+                             central_simulation, 
                              weather_index_scenario, 
                              weather_index_baseline,
                              Region_select, 
@@ -72,14 +73,15 @@ getSummaryCentral = function(central_simulation,
   EBITDA_diff = EBITDA_scenario - EBITDA_baseline
   
   # Update weather index (better for plot as normal conditions not precisely zero)
-  for (w in 5:(length(weather_index_scenario)-1)) {
+  for (w in 5:(length(weather_index_scenario))) {
     if (weather_index_scenario[w] == weather_index_baseline[1]){# equal to normal conditions
       weather_index_scenario[w] = 0
     } 
   }
   
+  
   # save central vectors
-  summary_central = data.frame(weather_indices = weather_index_scenario[5:14],
+  summary_central = data.frame(weather_indices = weather_index_scenario[5:(yrs+4)],
                                exp_baseline = exp_outcomes_baseline,
                                stock_baseline = stock_outcomes_baseline,
                                revenue_direct_baseline = revenue_outcomes_direct_baseline,

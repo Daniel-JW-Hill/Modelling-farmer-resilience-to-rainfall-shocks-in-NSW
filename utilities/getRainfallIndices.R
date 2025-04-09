@@ -2,7 +2,8 @@
 
 # Retrieves the estimated GAMs results given the realisation of rainfall. 
 
-getRainfallIndices = function(opex_gams, 
+getRainfallIndices = function(yrs,
+                              opex_gams, 
                               stock_gams, 
                               revenue_gams, 
                               inputyear1, 
@@ -17,7 +18,7 @@ getRainfallIndices = function(opex_gams,
                               inputyear10){
   
   weather_options = sort(unique(opex_gams$SPI_index_L1)) # simulated data options
-  weather_index_baseline = rep(weather_options[7], 15) # 'typical' conditions - as close as zero as possible for all
+  weather_index_baseline = rep(weather_options[7], (yrs + 4)) # 'typical' conditions - as close as zero as possible for all
   weather_index_scenario = weather_index_baseline
   weather_choices = c(
     'Very dry (-1)',-0.8,-0.6,-0.45,-0.3,-0.15,
@@ -36,11 +37,12 @@ getRainfallIndices = function(opex_gams,
   weather_index_scenario[12] = weather_options[which(weather_choices == inputyear8)]
   weather_index_scenario[13] = weather_options[which(weather_choices == inputyear9)]
   weather_index_scenario[14] = weather_options[which(weather_choices == inputyear10)]
+  weather_index_scenario[15:(yrs+4)] = weather_options[7] # remaining years assumed 'normal' conditions. 
   
-  fitted_exp_baseline = fitted_stock_baseline  = fitted_revenue_baseline = rep(0, 10)
-  fitted_exp_scenario = fitted_stock_scenario  = fitted_revenue_scenario  = rep(0, 10)
+  fitted_exp_baseline = fitted_stock_baseline  = fitted_revenue_baseline = rep(0, yrs) 
+  fitted_exp_scenario = fitted_stock_scenario  = fitted_revenue_scenario  = rep(0, yrs)
   
-  for (y in 1:10) {
+  for (y in 1:yrs) {
     # reverses vectors as data is saved where first column is current year, subsequent columns lags
     inputs_weather_baseline = rev(weather_index_baseline[y:(y + 3)]) 
     revenue_weather_baseline = rev(weather_index_baseline[(y + 1):(y + 4)])

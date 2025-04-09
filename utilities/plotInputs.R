@@ -1,7 +1,8 @@
 
 # plots and returns change in inputs
 
-plotInputs = function(data_inputs, 
+plotInputs = function(yrs, 
+                      data_inputs, 
                       input_display, 
                       ymin_Input, 
                       ymax_Input,
@@ -57,7 +58,7 @@ plotInputs = function(data_inputs,
                   scale_fill_manual(labels = labels_plot, values = colour_values, ) +
                   scale_color_manual(labels = labels_plot, values = colour_values, ) +
                   scale_y_continuous(limits = limits) +
-                  scale_x_continuous(breaks = seq(1, 10, 1)) +
+                  scale_x_continuous(breaks = seq(1, yrs, 1)) +
                   geom_hline(yintercept = 100, linetype = 'dashed') +
                   theme_minimal() +
                   theme(

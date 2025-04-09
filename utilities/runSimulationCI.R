@@ -1,7 +1,8 @@
 
 #runs simulations for confidence intervals (bootstrapping)
 
-runSimulationCI = function(exp_coefs, 
+runSimulationCI = function(yrs,
+                           exp_coefs, 
                            stock_coefs,
                            revenue_coefs,
                            exp_sd,
@@ -49,7 +50,8 @@ runSimulationCI = function(exp_coefs,
                              mean = revenue_coefs,
                              sd = revenue_sd)
     
-    results = runSimulation(fitted_exp_baseline,
+    results = runSimulation(yrs,
+                            fitted_exp_baseline,
                             fitted_stock_baseline,
                             fitted_revenue_baseline,
                             fitted_exp_scenario,

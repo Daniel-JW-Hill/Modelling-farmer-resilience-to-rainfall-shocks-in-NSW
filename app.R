@@ -58,6 +58,9 @@ levels_stock = data.frame(regions = regions,
 min_b = 0.05
 max_b = 0.95
 
+# Time period 
+yrs = 20 # min of 10 years. 
+
 # load in nickel bias adjustment parameters. 
 nickel_adjustment = read.csv(file.path("Regression_parameters","nickel_bias_adjustment.csv"))
 
@@ -409,7 +412,8 @@ server <- function(input, output, session) {
       
       
       # Retrieve weather indices for simulation
-      rainfall_indices = getRainfallIndices(opex_gams, 
+      rainfall_indices = getRainfallIndices(yrs,
+                                            opex_gams, 
                                             stock_gams, 
                                             revenue_gams, 
                                             input$year1,
@@ -432,9 +436,9 @@ server <- function(input, output, session) {
       fitted_stock_scenario = rainfall_indices[[7]]
       fitted_revenue_scenario = rainfall_indices[[8]]
       
-      
       # Estimate Central Outcomes
-      central_simulation  = runSimulation(fitted_exp_baseline,
+      central_simulation  = runSimulation(yrs,
+                                          fitted_exp_baseline,
                                           fitted_stock_baseline,
                                           fitted_revenue_baseline,
                                           fitted_exp_scenario,
@@ -445,7 +449,8 @@ server <- function(input, output, session) {
                                           revenue_coefs)
       
       # save central results and get baseline results. 
-      summary_central = getSummaryCentral(central_simulation,
+      summary_central = getSummaryCentral(yrs, 
+                                          central_simulation,
                                           weather_index_scenario, 
                                           weather_index_baseline,
                                           input$Region_select, 
@@ -455,7 +460,8 @@ server <- function(input, output, session) {
       
 
       # Estimate Confidence intervals
-      summary_CI = runSimulationCI(exp_coefs, 
+      summary_CI = runSimulationCI(yrs,
+                                   exp_coefs, 
                                    stock_coefs,
                                    revenue_coefs,
                                    exp_sd,
@@ -481,14 +487,14 @@ server <- function(input, output, session) {
       #Save dataframes for ggplot.
       data_inputs = data.frame(
         Year = 1:nrow(summary_central),
-        Type = rep(c("ExpOutcomes", "StockOutcomes"), each = 10),
+        Type = rep(c("ExpOutcomes", "StockOutcomes"), each = yrs),
         Central = c(summary_central$exp_outcomes_scenario_percent, summary_central$stock_outcomes_scenario_percent),
         Lower = c(summary_lower$exp_outcomes_scenario_percent, summary_lower$stock_outcomes_scenario_percent),
         Upper = c(summary_upper$exp_outcomes_scenario_percent, summary_upper$stock_outcomes_scenario_percent))
       
       data_outputs = data.frame(
         Year = 1:nrow(summary_central),
-        Type = rep(c("Direct", "Exp", "Stock", 'Total'), each = 10),
+        Type = rep(c("Direct", "Exp", "Stock", 'Total'), each = yrs),
         Central = c(summary_central$revenue_outcomes_direct_scenario_percent, 
                     summary_central$revenue_outcomes_exp_scenario_percent, 
                     summary_central$revenue_outcomes_stock_scenario_percent, 
@@ -528,7 +534,7 @@ server <- function(input, output, session) {
   # Plot weather chart
   output$rainfallPlot = renderPlot({
     req(plot_data$plot_data)
-    plot = plotRainfall( plot_data$plot_data$data_summary)
+    plot = plotRainfall(plot_data$plot_data$data_summary, yrs)
     plot
   })
   
@@ -537,7 +543,7 @@ server <- function(input, output, session) {
     filename = function() { "rainfall_chart.tiff" },
     content = function(file) {
       req(plot_data$plot_data)
-      plot = plotRainfall(plot_data$plot_data$data_summary)
+      plot = plotRainfall(plot_data$plot_data$data_summary, yrs)
       ggsave(file, plot = plot, width = 21, height = 20, units = 'cm', dpi = 300)
     }
   )
@@ -545,7 +551,8 @@ server <- function(input, output, session) {
   # plot inputs chart
   output$resultsInput = renderPlot({
     req(plot_data$plot_data)
-    plot = plotInputs(plot_data$plot_data$data_inputs,
+    plot = plotInputs(yrs,
+                      plot_data$plot_data$data_inputs,
                       input$input_display, 
                       input$ymin_Input, 
                       input$ymax_Input,
@@ -558,7 +565,8 @@ server <- function(input, output, session) {
     filename = function() { "input_chart.tiff" },
     content = function(file) {
       req(plot_data$plot_data)
-      plot = plotInputs(plot_data$plot_data$data_inputs,
+      plot = plotInputs(yrs,
+                        plot_data$plot_data$data_inputs,
                         input$input_display, 
                         input$ymin_Input, 
                         input$ymax_Input,
@@ -571,7 +579,8 @@ server <- function(input, output, session) {
   # Plot outputs
   output$resultsOutput = renderPlot({
     req(plot_data$plot_data)
-    plot = plotOutputs(plot_data$plot_data$data_outputs,
+    plot = plotOutputs(yrs,
+                       plot_data$plot_data$data_outputs,
                        input$output_display,
                        input$ymin_Output,
                        input$ymax_Output, 
@@ -585,7 +594,8 @@ server <- function(input, output, session) {
     filename = function() { "output_chart.tiff" },
     content = function(file) {
       req(plot_data$plot_data)
-      plot = plotOutputs(plot_data$plot_data$data_outputs,
+      plot = plotOutputs(yrs,
+                         plot_data$plot_data$data_outputs,
                          input$output_display,
                          input$ymin_Output,
                          input$ymax_Output, 
@@ -622,7 +632,7 @@ server <- function(input, output, session) {
     filename = function() { "simulation_results_all.csv" },
     content = function(file) {
       req(plot_data$plot_data)
-      data_full = getFullResults(plot_data$plot_data)
+      data_full = getFullResults(yrs, plot_data$plot_data)
       write.csv(data_full, file, row.names = TRUE)
     }
   )

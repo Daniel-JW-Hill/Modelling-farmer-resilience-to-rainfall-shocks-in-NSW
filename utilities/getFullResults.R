@@ -1,10 +1,10 @@
 
-getFullResults = function(plot_data){
+getFullResults = function(yrs,plot_data){
       data_Central = plot_data$data_summary
       data_Lower =  plot_data$data_summary_lower
       data_Upper =  plot_data$data_summary_upper
       
-      data_Central$YEAR = 1:10
+      data_Central$YEAR = 1:yrs
       data_Central = data_Central[,c(ncol(data_Central),1:(ncol(data_Central)-1))]
       
       colnames(data_Central) = c("Year", 

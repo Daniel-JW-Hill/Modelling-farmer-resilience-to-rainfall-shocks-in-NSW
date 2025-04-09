@@ -2,7 +2,8 @@
 
 # Runs simulation and saves input and output outcomes (as change from mean)
 
-runSimulation = function(fitted_exp_baseline,
+runSimulation = function(yrs,
+                         fitted_exp_baseline,
                          fitted_stock_baseline,
                          fitted_revenue_baseline,
                          fitted_exp_scenario,
@@ -12,20 +13,20 @@ runSimulation = function(fitted_exp_baseline,
                          stock_coefs, 
                          revenue_coefs){
   
-  exp_frame_baseline = initialise_frame(4, 12, c(0, 0, 0, fitted_exp_baseline[1]))
-  exp_frame_scenario = initialise_frame(4, 12, c(0, 0, 0, fitted_exp_scenario[1]))
-  stock_frame_baseline = initialise_frame(7, 12, c(0, 0, 0, 0, 0, 0, fitted_stock_baseline[1]))
-  stock_frame_scenario = initialise_frame(7, 12, c(0, 0, 0, 0, 0, 0, fitted_stock_scenario[1]))
-  revenue_frame_baseline = initialise_frame(7, 12, c(0, 0, 0, 0, 0, 0, fitted_revenue_baseline[1]))
-  revenue_frame_scenario = initialise_frame(7, 12, c(0, 0, 0, 0, 0, 0, fitted_revenue_scenario[1]))
+  exp_frame_baseline = initialise_frame(4, yrs+2, c(0, 0, 0, fitted_exp_baseline[1]))
+  exp_frame_scenario = initialise_frame(4, yrs+2, c(0, 0, 0, fitted_exp_scenario[1]))
+  stock_frame_baseline = initialise_frame(7, yrs+2, c(0, 0, 0, 0, 0, 0, fitted_stock_baseline[1]))
+  stock_frame_scenario = initialise_frame(7, yrs+2, c(0, 0, 0, 0, 0, 0, fitted_stock_scenario[1]))
+  revenue_frame_baseline = initialise_frame(7, yrs+2, c(0, 0, 0, 0, 0, 0, fitted_revenue_baseline[1]))
+  revenue_frame_scenario = initialise_frame(7, yrs+2, c(0, 0, 0, 0, 0, 0, fitted_revenue_scenario[1]))
   
-  exp_outcomes_baseline = stock_outcomes_baseline = revenue_outcomes_baseline = rep(0, 10)
-  exp_outcomes_scenario = stock_outcomes_scenario = rep(0, 10)
-  revenue_outcomes_direct_baseline = revenue_outcomes_exp_baseline = revenue_outcomes_stock_baseline = revenue_outcomes_baseline = rep(0, 10)
-  revenue_outcomes_direct_scenario = revenue_outcomes_exp_scenario = revenue_outcomes_stock_scenario = revenue_outcomes_scenario = rep(0, 10)
+  exp_outcomes_baseline = stock_outcomes_baseline = revenue_outcomes_baseline = rep(0, yrs)
+  exp_outcomes_scenario = stock_outcomes_scenario = rep(0, yrs)
+  revenue_outcomes_direct_baseline = revenue_outcomes_exp_baseline = revenue_outcomes_stock_baseline = revenue_outcomes_baseline = rep(0, yrs)
+  revenue_outcomes_direct_scenario = revenue_outcomes_exp_scenario = revenue_outcomes_stock_scenario = revenue_outcomes_scenario = rep(0, yrs)
   
   
-  for (y in 1:10) {
+  for (y in 1:yrs) {
     
     #### BASELINE ####
     exp_outcomes_baseline[y] = t(exp_frame_baseline[, y]) %*% as.matrix((exp_coefs))
@@ -91,7 +92,7 @@ runSimulation = function(fitted_exp_baseline,
     stock_frame_scenario[7, y + 1] = fitted_stock_scenario[y + 1]
     
     revenue_frame_scenario[1, y + 1] = revenue_outcomes_scenario[y]
-    revenue_frame_scenario[2, y + 1] = revenue_outcomes_scenario[y] ^2
+    revenue_frame_scenario[2, y + 1] = revenue_outcomes_scenario[y] ^ 2
     revenue_frame_scenario[7, y + 1] = fitted_revenue_scenario[y + 1]
   }
   

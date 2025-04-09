@@ -1,7 +1,8 @@
 
 
 
-plotOutputs = function(data_outputs,
+plotOutputs = function(yrs,
+                       data_outputs,
                        output_display,
                        ymin_Output,
                        ymax_Output, 
@@ -75,7 +76,7 @@ plotOutputs = function(data_outputs,
       scale_fill_manual(labels = labels_plot, values = colour_values) +
       scale_color_manual(labels = labels_plot, values = colour_values) +
       scale_y_continuous(limits = limits) +
-      scale_x_continuous(breaks = seq(1, 10, 1)) +
+      scale_x_continuous(breaks = seq(1, yrs, 1)) +
       geom_hline(yintercept = 100, linetype = 'dashed') +
       theme_minimal() +
       theme(
