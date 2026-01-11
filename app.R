@@ -26,14 +26,6 @@ source(file.path("utilities", "getFullResults.R"))
 
 #read in and manipulate map boundaries
 load("SA4_boundaries.Rdata")
-boundaries_no_coastal$labels = c(
-  'NSW',
-  'Far_West',
-  'Murray_Riverina',
-  "Central_West",
-  'Southern_Tablelands',
-  'Northern_Tablelands'
-)
 
 # Pre-define levels (models are demeaned and these are added back in)
 # levels derived from summary statistics.
@@ -41,8 +33,7 @@ regions = c(
   "Central_West",
   "Far_West",
   "Murray_Riverina",
-  "Northern_Tablelands",
-  'Southern_Tablelands'
+  "Northern_Tablelands"
 )
 
 levels_grossReturns = data.frame(regions = regions,
