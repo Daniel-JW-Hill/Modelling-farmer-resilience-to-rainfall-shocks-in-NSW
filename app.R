@@ -179,11 +179,10 @@ ui <- fluidPage(
             "Region_select",
             label = p("Region for analysis"),
             choices = list(
-              "Central West" = 'Central_West',
-              "Far West" = 'Far_West',
-              "Murray-Riverina" = 'Murray_Riverina',
-              "Northern Tablelands" = 'Northern_Tablelands',
-              "Southern Tablelands" = "Southern_Tablelands"
+              "Central West" = 'Central West',
+              "Far West" = 'Far West',
+              "Murray-Riverina" = 'Murray and Riverina',
+              "Northern Tablelands" = 'Northern Tablelands'
             ),
             selected = 'Central_West'
           )
