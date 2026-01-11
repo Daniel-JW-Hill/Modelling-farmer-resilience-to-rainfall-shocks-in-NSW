@@ -28,7 +28,7 @@ source(file.path("utilities", "getFullResults.R"))
 load("SA4_boundaries.Rdata")
 
 # Pre-define levels (models are demeaned and these are added back in)
-# levels derived from summary statistics.
+# levels derived from summary statistics. Median of medians for all years for each region. 
 regions = c(
   "Central_West",
   "Far_West",
@@ -37,23 +37,43 @@ regions = c(
 )
 
 levels_grossReturns = data.frame(regions = regions,
-                                 levels = c(714.25, 201.40, 576.77, 509.07, 489.80))
+                                 levels = c(247.32, 
+                                            115.69, 
+                                            321.62, 
+                                            194.47))
 
 levels_exp = data.frame(regions = regions,
-                        levels = c(801.95, 213.80, 622.80, 545.30, 551.02))
+                        levels = c(273.99, 
+                                   109.29, 
+                                   331.07, 
+                                   202.79))
 
 levels_stock = data.frame(regions = regions,
-                          levels = c(157.52, 43.43, 128.16, 134.46, 129.91))
+                          levels = c(33.92,
+                                     9.86,
+                                     39.24,
+                                     23.16))
+
+levels_assets = data.frame(regions = regions,
+                          levels = c(78.65,
+                                     28.71,
+                                     109.20,
+                                     80.09))
+
+levels_termsoftrade = data.frame(regions = regions,
+                           levels = c(100,
+                                      100,
+                                      100,
+                                      100)) # set to base year values 
+
+# Rainfall index levels we extract from the simulated data at SPI values = 0 for all years. 
 
 # min and max confidence intervals.
 min_b = 0.05
 max_b = 0.95
 
-# Time period 
+# Time period for impulse. 
 yrs = 20 # min of 10 years. 
-
-# load in nickel bias adjustment parameters. 
-nickel_adjustment = read.csv(file.path("Regression_parameters","nickel_bias_adjustment.csv"))
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
