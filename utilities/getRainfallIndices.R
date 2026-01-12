@@ -2,77 +2,49 @@
 
 # Retrieves the estimated GAMs results given the realisation of rainfall. 
 
-getRainfallIndices = function(yrs,
-                              opex_gams, 
-                              stock_gams, 
-                              revenue_gams, 
-                              inputyear1, 
-                              inputyear2,
-                              inputyear3,
-                              inputyear4,
-                              inputyear5,
-                              inputyear6,
-                              inputyear7,
-                              inputyear8,
-                              inputyear9,
-                              inputyear10){
+getRainfallIndices = function(yrs, 
+                              gams, 
+                              spi_t4, 
+                              spi_t3,
+                              spi_t2,
+                              spi_t1,
+                              spi_current,
+                              spi_lead){
   
-  weather_options = sort(unique(opex_gams$SPI_index_L1)) # simulated data options
-  weather_index_baseline = rep(weather_options[7], (yrs + 4)) # 'typical' conditions - as close as zero as possible for all
-  weather_index_scenario = weather_index_baseline
-  weather_choices = c(
-    'Very dry (-1)',-0.8,-0.6,-0.45,-0.3,-0.15,
-    'Typical rainfall (0)',
-    0.2, 0.35, 0.5, 0.7, 0.85, 1.0, 1.2,
-    'Very wet (1.35)'
-  ) # what user can select
+  rainfall_options = sort(unique(gams$SPI)) # simulated data options
+  rainfall_index_baseline = min(abs(rainfall_options)) # 'typical' conditions - as close as zero as possible for all years
+  rainfall_index_scenario = rep(rainfall_index_baseline, yrs+5) 
   
-  weather_index_scenario[5] = weather_options[which(weather_choices == inputyear1)]
-  weather_index_scenario[6] = weather_options[which(weather_choices == inputyear2)]
-  weather_index_scenario[7] = weather_options[which(weather_choices == inputyear3)]
-  weather_index_scenario[8] = weather_options[which(weather_choices == inputyear4)]
-  weather_index_scenario[9] = weather_options[which(weather_choices == inputyear5)]
-  weather_index_scenario[10] = weather_options[which(weather_choices == inputyear6)]
-  weather_index_scenario[11] = weather_options[which(weather_choices == inputyear7)]
-  weather_index_scenario[12] = weather_options[which(weather_choices == inputyear8)]
-  weather_index_scenario[13] = weather_options[which(weather_choices == inputyear9)]
-  weather_index_scenario[14] = weather_options[which(weather_choices == inputyear10)]
-  weather_index_scenario[15:(yrs+4)] = weather_options[7] # remaining years assumed 'normal' conditions. 
+  # First 4 entries equal to zero as normal conditions before first drought
+  rainfall_index_scenario[5] = rainfall_options[which.min(abs(rainfall_options - spi_t4))]
+  rainfall_index_scenario[6] = rainfall_options[which.min(abs(rainfall_options - spi_t3))]
+  rainfall_index_scenario[7] = rainfall_options[which.min(abs(rainfall_options - spi_t2))]
+  rainfall_index_scenario[8] = rainfall_options[which.min(abs(rainfall_options - spi_t1))]
+  rainfall_index_scenario[9] = rainfall_options[which.min(abs(rainfall_options - spi_current))]
+  rainfall_index_scenario[10] = rainfall_options[which.min(abs(rainfall_options - spi_lead))]
+ # remaining years assumed 'normal' conditions as we are modelling resilience for 'current' year. 
   
-  fitted_exp_baseline = fitted_stock_baseline  = fitted_revenue_baseline = rep(0, yrs) 
-  fitted_exp_scenario = fitted_stock_scenario  = fitted_revenue_scenario  = rep(0, yrs)
-  
-  for (y in 1:yrs) {
-    # reverses vectors as data is saved where first column is current year, subsequent columns lags
-    inputs_weather_baseline = rev(weather_index_baseline[y:(y + 3)]) 
-    revenue_weather_baseline = rev(weather_index_baseline[(y + 1):(y + 4)])
-    
-    input_row = which(apply(opex_gams[, 2:5], 1, function(row) all(row == inputs_weather_baseline)))
-    fitted_exp_baseline[y] = opex_gams$predicted[input_row]
-    fitted_stock_baseline[y] = stock_gams$predicted[input_row]
-    
-    revenue_row = which(apply(revenue_gams[, 2:5], 1, function(row) all(row == revenue_weather_baseline)))
-    fitted_revenue_baseline[y] = revenue_gams$predicted[revenue_row]
-    
-    inputs_weather_scenario = rev(weather_index_scenario[y:(y + 3)])
-    revenue_weather_scenario = rev(weather_index_scenario[(y + 1):(y + 4)])
-    
-    input_row = which(apply(opex_gams[, 2:5], 1, function(row) all(row == inputs_weather_scenario)))
-    fitted_exp_scenario[y] = opex_gams$predicted[input_row]
-    fitted_stock_scenario[y] = stock_gams$predicted[input_row]
-    
-    revenue_row = which(apply(revenue_gams[, 2:5], 1, function(row) all(row == revenue_weather_scenario)))
-    fitted_revenue_scenario[y] = revenue_gams$predicted[revenue_row]
+  index_baseline = index_scenario = rep(0, yrs + 6) # lag + lead years added in. 
+  index_normal = gams$y_hat[gams$SPIL4 == rainfall_index_baseline & 
+                              gams$SPIL3 == rainfall_index_baseline & 
+                              gams$SPIL2 ==  rainfall_index_baseline & 
+                              gams$SPIL1 == rainfall_index_baseline & 
+                              gams$SPICurrent == rainfall_index_baseline & 
+                              gams$SPILead == rainfall_index_baseline]
+  for (y in 1:(yrs+5)) { 
+    index_baseline[y] = index_normal
+    index_scenario = gams$y_hat[gams$SPIL4 == rainfall_index_scenario[y] & 
+                                gams$SPIL3 == rainfall_index_scenario[y+1] & 
+                                gams$SPIL2 ==  rainfall_index_scenario[y+2] & 
+                                gams$SPIL1 == rainfall_index_scenario[y+3] & 
+                                gams$SPICurrent == rainfall_index_scenario[y+4] & 
+                                gams$SPILead == rainfall_index_scenario[y+5]]
   }
   
-  return(list(weather_index_baseline, 
-              weather_index_scenario, 
-              fitted_exp_baseline,
-              fitted_stock_baseline,
-              fitted_revenue_baseline,
-              fitted_exp_scenario,
-              fitted_stock_scenario,
-              fitted_revenue_scenario))
+  return(list(rainfall_index_baseline, 
+              rainfall_index_scenario, 
+              index_baseline,
+              index_scenario))
   
   
 }
