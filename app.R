@@ -413,29 +413,20 @@ server <- function(input, output, session) {
       
       
       # Retrieve weather indices for simulation
-      rainfall_indices = getRainfallIndices(yrs,
-                                            opex_gams, 
-                                            stock_gams, 
-                                            revenue_gams, 
-                                            input$year1,
-                                            input$year2,
-                                            input$year3,
-                                            input$year4,
-                                            input$year5,
-                                            input$year6,
-                                            input$year7,
-                                            input$year8,
-                                            input$year9,
-                                            input$year10)
+      rainfall_indices = getRainfallIndices(yrs, 
+                                            gams, 
+                                            input$spi_t4, 
+                                            input$spi_t3,
+                                            input$spi_t2,
+                                            input$spi_t1,
+                                            input$spi_current,
+                                            input$spi_lead)
       
-      weather_index_baseline = rainfall_indices[[1]]
-      weather_index_scenario = rainfall_indices[[2]]
-      fitted_exp_baseline = rainfall_indices[[3]]
-      fitted_stock_baseline = rainfall_indices[[4]]
-      fitted_revenue_baseline = rainfall_indices[[5]]
-      fitted_exp_scenario = rainfall_indices[[6]]
-      fitted_stock_scenario = rainfall_indices[[7]]
-      fitted_revenue_scenario = rainfall_indices[[8]]
+      rainfall_index_baseline = rainfall_indices[[1]] #normal conditions, in SPI,  in a vector
+      rainfall_index_scenario = rainfall_indices[[2]] #chosen SPI values in a vector
+      index_baseline = rainfall_indices[[3]] # index as derived from GAMs model under normal conditions
+      index_scenario = rainfall_indices[[4]] # index as derived from GAMs model for chosen rainfall outcomes
+      rm(rainfall_indices)
       
       # Estimate Central Outcomes
       central_simulation  = runSimulation(yrs,
