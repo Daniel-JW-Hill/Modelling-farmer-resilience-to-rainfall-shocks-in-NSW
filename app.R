@@ -167,7 +167,7 @@ ui <- fluidPage(
         "About this application",
         align = "center",
         br(),
-        p("This application simulates farn outcomes (per ha) for representative farms in 5 regions across NSW."),
+        p("This application simulates farn outcomes (per ha) for representative farms in 4 regions across NSW."),
         p("The simulations are based on parameters derived from econometric analysis of ABS BLADE data."),
         p("This app was written under the ARC linkage project 'Innovations in Agricultural Greenhouse Gas Management and Policy'. More details to come!"),
         p("Written by Daniel Hill (UNE), Oscar Cacho (UNE), Jeff Connor (UniSA) and Daniel Gregg (Flinders University)"),
@@ -194,36 +194,31 @@ ui <- fluidPage(
       
       tabPanel(
         "Select rainfall scenario",
-        align = "Left",
+        align = "left",
         br(),
-        p("This tab allows the user to change the realisations of the rainfall index over a 10 year period, 
-        with the model simulating how farm inputs and outputs respond to these realised rainfall outcomes.
-        The rainfall index is represented as an annual Standardised Precipitation Index (SPI). 
-        The model allows for 15 different realisations of this SPI index for each given year. 
-        The SPI index is measured as the standard deviation from mean annual rainfall. In other words, a value of -1 occurs when rainfall is 1 standard deviation lower than average annual rainfall for a given SA4 region. 
-        Average rainfall is assumed for the five years prior to the simulation time frame. 
-          "),
+        p("This tab allows the user to change the realisations of rainfall to test how rainfall outcomes impact farm revenues and input responses.  
+          The rainfall index is represented as an annual Standardised Precipitation Index (SPI). 
+          The SPI index is measured as the standard deviation from mean annual rainfall.
+          The model can accept any SPI value between -0.75 and 1.00."
+        ),
         br(),
-        p("Once the desired SPI indices are chosen for each year, press the 'Simulate results' button at the bottom of this tab.
-          The model should take a few seconds to complete" ),
         
-        # Add slider for selection of weather index.
-        # This involves selecting from a scale from very dry to very wet
-        # for each year.
-        fluidRow(width = 12, 
-                 column(6,
-                   lapply(1:5, function(i) createRainfallSlider(paste0("year", i), paste("Year", i))) ),
-                   column(
-                   6,
-                   lapply(6:10, function(i) createRainfallSlider(paste0("year", i), paste("Year", i))))
-                ),
-        fluidRow(width = 12, 
-                 column(12,offset = 0,
-                   actionButton('runSimulation', 'Simulate results', icon = icon("rocket")))),
+        fluidRow(column(12,
+            createRainfallNumeric("spi_t4", "Four year lag rainfall index (SPI t-4)"),
+            createRainfallNumeric("spi_t3", "Three year lag rainfall index (SPI t-3)"),
+            createRainfallNumeric("spi_t2", "Two year lag rainfall index (SPI t-2)"),
+            createRainfallNumeric("spi_t1", "One year lag rainfall index (SPI t-1)"),
+            createRainfallNumeric("spi_current", "Current year rainfall index (SPI T)"),
+            createRainfallNumeric("spi_lead", "Expectations of next year's rainfall index (SPI t+1)"))),
+        
         br(),
+        
+        fluidRow(column(12,
+            actionButton("runSimulation", "Simulate results", icon = icon("rocket")))),
+       
+        br(), 
         br()
-        
-      ) ,
+      ),
       
       #Weather chart
       tabPanel(
