@@ -9,6 +9,7 @@ library(sf) # for map
 library(shinyWidgets) # for additional widgets
 library(shinyjs) #for dynamic updates to buttons
 library(stringr) #wrapping strings
+library(readxl) # for Arellano Bond coefficients
 
 # load helper functions
 source(file.path("utilities", "createRainfallSlider.R"))
@@ -244,7 +245,7 @@ ui <- fluidPage(
         "Input results",
         align = "Left",
         p("This tab presents the simulation results for expenditure and stock value in response to the modelled realisations in the rainfall index.
-          The plot presents the change in expenditure and stock value per hectare relative to 'normal' conditons (indexed at 100). Normal conditions are defined as ten years of average annual rainfall.
+          The plot presents the expenditure and stock values per hectare relative to 'normal/equilibrium' conditons, which is indexed at 100. Normal conditions occur when rainfal is equal to the long-term mean for all years.
           For example, a value of 120 for expenditure indicates expenditure per ha for a given year is 20% higher relative to what it would be under normal conditions"
           ),
         dropdownButton(
@@ -403,16 +404,11 @@ server <- function(input, output, session) {
     shinyjs::delay(100, {
       
       # Retrieve data for relevant region. 
-      data_files = loadData(input$Region_select, nickel_adjustment )
-      opex_gams = data_files[[1]]
-      revenue_gams = data_files[[2]]
-      stock_gams = data_files[[3]]
-      exp_coefs = data_files[[4]]
-      exp_sd = data_files[[5]]
-      stock_coefs = data_files[[6]]
-      stock_sd = data_files[[7]]
-      revenue_coefs = data_files[[8]]
-      revenue_sd = data_files[[9]]
+      data_files = loadData(input$Region_select)
+      gams = data_files[[1]]
+      exp_coefs = data_files[[2]]
+      stock_coefs = data_files[[3]]
+      revenue_coefs = data_files[[4]]
       rm(data_files)
       
       
