@@ -12,7 +12,7 @@ library(stringr) #wrapping strings
 library(readxl) # for Arellano Bond coefficients
 
 # load helper functions
-source(file.path("utilities", "createRainfallSlider.R"))
+source(file.path("utilities", "createRainfallNumeric.R"))
 source(file.path("utilities", "loadData.R"))
 source(file.path("utilities", "getRainfallIndices.R"))
 source(file.path("utilities", 'initialise_frame.R'))
