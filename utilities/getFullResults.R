@@ -4,11 +4,11 @@ getFullResults = function(yrs,plot_data){
       data_Lower =  plot_data$data_summary_lower
       data_Upper =  plot_data$data_summary_upper
       
-      data_Central$YEAR = 1:yrs
+      data_Central$YEAR = 1:(yrs+1)
       data_Central = data_Central[,c(ncol(data_Central),1:(ncol(data_Central)-1))]
       
       colnames(data_Central) = c("Year", 
-                                 "Weather_index", 
+                                 "Rainfall_index", 
                                  "Exp_baseline", 
                                  "Stock_baseline", 
                                  "revenue_direct_baseline", 
