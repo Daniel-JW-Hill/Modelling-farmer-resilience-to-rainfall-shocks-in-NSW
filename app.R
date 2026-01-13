@@ -534,7 +534,7 @@ server <- function(input, output, session) {
   # Plot weather chart
   output$rainfallPlot = renderPlot({
     req(plot_data$plot_data)
-    plot = plotRainfall(plot_data$plot_data$data_summary, yrs)
+    plot = plotRainfall(plot_data$plot_data$data_summary)
     plot
   })
   

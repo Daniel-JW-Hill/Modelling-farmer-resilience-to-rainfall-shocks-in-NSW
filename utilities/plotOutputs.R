@@ -58,6 +58,9 @@ plotOutputs = function(yrs,
     data_outputs$Upper = data_outputs$Central
   }
   
+  data_outputs$Year = seq(-4, -4 + nrow(data_outputs)/length(unique(data_outputs$Type)) - 1, 1)
+  x_vals = seq(-4, -4 + yrs - 1, 1)
+  
   #Plot chart
   plot = ggplot(data_outputs,
            aes(
@@ -71,13 +74,14 @@ plotOutputs = function(yrs,
                   color = NA) +
       geom_line() +
       ggtitle("Change in gross returns ($AUD/ha)", subtitle = "Relative to 'normal' rainfall conditions") +
-      xlab("Year") +
+      xlab("Year relative to current") +
       ylab("Change\n (relative to 'normal' rainfall conditions indexed at 100)") +
       scale_fill_manual(labels = labels_plot, values = colour_values) +
       scale_color_manual(labels = labels_plot, values = colour_values) +
       scale_y_continuous(limits = limits) +
-      scale_x_continuous(breaks = seq(1, yrs, 1)) +
+      scale_x_continuous(breaks = x_vals) +
       geom_hline(yintercept = 100, linetype = 'dashed') +
+      geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
       theme_minimal() +
       theme(
         plot.title = element_text(size = 16),
