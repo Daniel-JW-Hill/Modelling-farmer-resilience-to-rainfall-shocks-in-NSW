@@ -10,6 +10,15 @@ getSummaryCentral = function(yrs,
                              levels_exp, 
                              levels_stock) {
   
+  Region_select = switch(
+    Region_select,
+    "Central West" = "Central_West",
+    "Far West" = "Far_West",
+    "Murray-Riverina" = "Murray_Riverina",
+    "Northern Tablelands" = "Northern_Tablelands",
+    stop("No region selected")
+  )
+  
   #retrieve vectors of results
   exp_outcomes_baseline = central_simulation$exp_outcomes_baseline
   exp_outcomes_scenario = central_simulation$exp_outcomes_scenario
@@ -82,7 +91,7 @@ getSummaryCentral = function(yrs,
   
   
   # save central vectors
-  summary_central = data.frame(rainfall_indices = rainfall_index_scenario,
+  summary_central = data.frame(rainfall_indices = rainfall_index_scenario[5:length(rainfall_index_scenario)], # drop calibration years to align results. 
                                exp_baseline = exp_outcomes_baseline,
                                stock_baseline = stock_outcomes_baseline,
                                revenue_direct_baseline = revenue_outcomes_direct_baseline,

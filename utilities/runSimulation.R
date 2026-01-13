@@ -3,7 +3,6 @@
 # Runs simulation and saves input and output outcomes (as change from mean)
 
 runSimulation = function(yrs,
-                         region_select, # input$Region_select
                          index_baseline,
                          index_scenario,
                          exp_coefs,

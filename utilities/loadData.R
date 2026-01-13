@@ -3,11 +3,6 @@
 
 loadData = function(Region_select){
   
-  
-  
-
-  
-  
   regions = c("CentralWest",
               "FarWest",
               "MurrayRiverina",
@@ -19,7 +14,7 @@ loadData = function(Region_select){
   file_prefix = switch(
     Region_select,
     "Central West" = "CentralWest",
-    "Far West" = "arWest",
+    "Far West" = "FarWest",
     "Murray-Riverina" = "MurrayRiverina",
     "Northern Tablelands" = "NorthernTablelands",
     stop("No region selected")

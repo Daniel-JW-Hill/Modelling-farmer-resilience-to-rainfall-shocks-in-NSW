@@ -208,7 +208,7 @@ ui <- fluidPage(
             createRainfallNumeric("spi_t3", "Three year lag rainfall index (SPI t-3)"),
             createRainfallNumeric("spi_t2", "Two year lag rainfall index (SPI t-2)"),
             createRainfallNumeric("spi_t1", "One year lag rainfall index (SPI t-1)"),
-            createRainfallNumeric("spi_current", "Current year rainfall index (SPI T)"),
+            createRainfallNumeric("spi_current", "Current year rainfall index (SPI t)"),
             createRainfallNumeric("spi_lead", "Expectations of next year's rainfall index (SPI t+1)"))),
         
         br(),
@@ -370,6 +370,7 @@ server <- function(input, output, session) {
   
   # retrieve boundaries for plot based on analysis region
   boundaries = reactive({
+    req(input$Region_select)
     boundary_row = which(boundaries_no_coastal$labels == input$Region_select)
     boundaries_filtered = boundaries_no_coastal[c(1, boundary_row), ]
     return(boundaries_filtered)
@@ -377,6 +378,7 @@ server <- function(input, output, session) {
   
   # plot map
   output$map = renderPlot({
+    req(boundaries())
     fill_colors = c("NSW" = "white")
     fill_colors[input$Region_select] = "#4682B4"
     
@@ -392,6 +394,14 @@ server <- function(input, output, session) {
   
   # Run simulation when button is pressed.
   observeEvent(input$runSimulation, {
+    
+    req(
+      input$Region_select,
+      yrs,
+      min_b,
+      max_b
+    )
+    
     disable('runSimulation')
     updateActionButton(
       session = session,
@@ -400,7 +410,6 @@ server <- function(input, output, session) {
       icon = icon("sync", class = "fa-spin")
     )
     
-    shinyjs::delay(100, {
       
       # Retrieve data for relevant region. 
       data_files = loadData(input$Region_select)
@@ -431,9 +440,9 @@ server <- function(input, output, session) {
       central_simulation  = runSimulation(yrs,
                                           index_baseline,
                                           index_scenario,
-                                          exp_coefs,
-                                          stock_coefs, 
-                                          revenue_coefs)
+                                          exp_coefficients,
+                                          stock_coefficients, 
+                                          revenue_coefficients)
       
       # save central results and get baseline results. 
       summary_central = getSummaryCentral(yrs, 
@@ -444,6 +453,12 @@ server <- function(input, output, session) {
                                           levels_grossReturns, 
                                           levels_exp, 
                                           levels_stock) 
+      
+      #Check results
+      validate(
+        need(!is.null(summary_central), "Central simulation failed"),
+        need(nrow(summary_central) > 0, "Central simulation returned no rows")
+      )
       
 
       # Estimate Confidence intervals
@@ -464,17 +479,23 @@ server <- function(input, output, session) {
       summary_lower = summary_CI$summary_lower
       summary_upper = summary_CI$summary_upper
       
+      #check
+      validate(
+        need(!is.null(summary_lower), "CI lower bound missing"),
+        need(!is.null(summary_upper), "CI upper bound missing")
+      )
+      
       #Save dataframes for ggplot.
       data_inputs = data.frame(
         Year = 1:nrow(summary_central),
-        Type = rep(c("ExpOutcomes", "StockOutcomes"), each = yrs),
+        Type = rep(c("ExpOutcomes", "StockOutcomes"), each = yrs+1),
         Central = c(summary_central$exp_outcomes_scenario_percent, summary_central$stock_outcomes_scenario_percent),
         Lower = c(summary_lower$exp_outcomes_scenario_percent, summary_lower$stock_outcomes_scenario_percent),
         Upper = c(summary_upper$exp_outcomes_scenario_percent, summary_upper$stock_outcomes_scenario_percent))
       
       data_outputs = data.frame(
         Year = 1:nrow(summary_central),
-        Type = rep(c("Direct", "Exp", "Stock", 'Total'), each = yrs),
+        Type = rep(c("Direct", "Exp", "Stock", 'Total'), each = yrs+1),
         Central = c(summary_central$revenue_outcomes_direct_scenario_percent, 
                     summary_central$revenue_outcomes_exp_scenario_percent, 
                     summary_central$revenue_outcomes_stock_scenario_percent, 
@@ -495,7 +516,6 @@ server <- function(input, output, session) {
                                  data_summary_upper = summary_upper)
       
       
-    })
     
     # change back button
     delay(5000, {

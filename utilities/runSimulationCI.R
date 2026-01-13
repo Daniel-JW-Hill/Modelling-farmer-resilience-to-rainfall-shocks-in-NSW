@@ -14,6 +14,15 @@ runSimulationCI = function(yrs,
                            min_b,
                            max_b){
   
+  Region_select = switch(
+    Region_select,
+    "Central West" = "Central_West",
+    "Far West" = "Far_West",
+    "Murray-Riverina" = "Murray_Riverina",
+    "Northern Tablelands" = "Northern_Tablelands",
+    stop("No region selected")
+  )
+  
   # set up frames. 
   bb = 500 # number of draws.
   exp_outcomes_scenario_diff_ls = exp_outcomes_scenario_ls = list()
@@ -24,13 +33,13 @@ runSimulationCI = function(yrs,
   revenue_outcomes_scenario_diff_ls = revenue_outcomes_scenario_ls = list()
   EBITDA_outcomes_scenario_diff_ls  = list()
   
-  exp_coefs_vec = exp_coefs[,2]
-  stock_coefs_vec = stock_coefs[,2]
-  revenue_coefs_vec = revenue_coefs[,2]
+  exp_coefs_vec = as.numeric(exp_coefs[[2]])
+  stock_coefs_vec = as.numeric(stock_coefs[[2]])
+  revenue_coefs_vec = as.numeric(revenue_coefs[[2]])
   
-  exp_sd = exp_coefs[,3]
-  stock_sd = stock_coefs[,3]
-  revenue_sd = revenue_coefs[,3]
+  exp_sd = as.numeric(exp_coefs[[3]])
+  stock_sd = as.numeric(stock_coefs[[3]])
+  revenue_sd = as.numeric(revenue_coefs[[3]])
   
   exp_coefs_mat = exp_coefs
   stock_coefs_mat = stock_coefs
@@ -57,7 +66,6 @@ runSimulationCI = function(yrs,
     revenue_coefs_mat[,2] = revenue_coefs_b
     
     results = runSimulation(yrs,
-                            Region_select,
                             index_baseline,
                             index_scenario,
                             exp_coefs_mat,
@@ -76,7 +84,6 @@ runSimulationCI = function(yrs,
     revenue_outcomes_stock_scenario = results$revenue_outcomes_stock_scenario
     revenue_outcomes_baseline =  results$revenue_outcomes_baseline
     revenue_outcomes_scenario =  results$revenue_outcomes_scenario
-    
     
     # Add levels back into estimates
     exp_outcomes_baseline = exp_outcomes_baseline + log(levels_exp$levels[levels_exp$regions == Region_select])
@@ -127,7 +134,6 @@ runSimulationCI = function(yrs,
     revenue_outcomes_scenario_ls[[b]] = (revenue_outcomes_scenario_diff_ls[[b]] / revenue_outcomes_baseline) * 100 + 100
   }
   
-
   # Find the min and max for geom ribbon
   exp_outcomes_scenario_ls = do.call(rbind, exp_outcomes_scenario_ls)
   stock_outcomes_scenario_ls = do.call(rbind, stock_outcomes_scenario_ls)
@@ -159,7 +165,7 @@ runSimulationCI = function(yrs,
   revenue_outcomes_scenario_diff_ls = apply(revenue_outcomes_scenario_diff_ls, 2, quantile, probs = c(min_b, max_b))
   EBITDA_outcomes_scenario_diff_ls = apply(EBITDA_outcomes_scenario_diff_ls, 2, quantile, probs = c(min_b, max_b))
   
-  # get summary dataframes. 
+  
   summary_lower = data.frame(exp_outcomes_scenario_diff  = exp_outcomes_scenario_diff_ls[1,] ,
                              stock_outcomes_scenario_diff  =  stock_outcomes_scenario_diff_ls[1,] ,
                              revenue_outcomes_direct_scenario_diff =  revenue_outcomes_direct_scenario_diff_ls[1,],
