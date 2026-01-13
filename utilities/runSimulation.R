@@ -8,12 +8,7 @@ runSimulation = function(yrs,
                          index_scenario,
                          exp_coefs,
                          stock_coefs, 
-                         revenue_coefs,
-                         levels_grossReturns,
-                         levels_exp,
-                         levels_stock,
-                         levels_assets, 
-                         levels_termsoftrade){
+                         revenue_coefs){
   
   #drop years in rainfall index no longer needed
   index_baseline = na.omit(index_baseline)
@@ -24,13 +19,7 @@ runSimulation = function(yrs,
   stock_coefs_vec = stock_coefs[,2]
   revenue_coefs_vec = revenue_coefs[,2]
   
-  # Get relevant variable values 
-  equil_grossReturns = log(levels_grossReturns$levels[which(levels_grossReturns$regions == region_select)])
-  equil_exp = log(levels_exp$levels[which(levels_exp$regions == region_select)])
-  equil_stock = log(levels_stock$levels[which(levels_stock$regions == region_select)])
-  equil_assets = log(levels_assets$levels[which(levels_assets$regions == region_select)])
-  equil_termsTrade = levels_termsoftrade$levels[which(levels_termsoftrade$regions == region_select)]
-  
+
   #Initialise matrices to save results. 
   exp_frame_baseline =  matrix(0, nrow = 7, ncol = yrs+1) # first year is the lag year for revenues so we add an extra year.  
   exp_frame_scenario = matrix(0, nrow = 7, ncol = yrs+1)
@@ -40,30 +29,30 @@ runSimulation = function(yrs,
   revenue_frame_scenario = matrix(0, nrow = 7, ncol = yrs+1)
   
   # Pre-fill values into the frames
-  stock_frame_baseline[1,1] = stock_frame_scenario[1,1] = equil_stock  
-  stock_frame_baseline[2,] = stock_frame_scenario[2] = equil_assets # constant all years
-  stock_frame_baseline[3,1] = stock_frame_scenario[3,1] = equil_grossReturns
-  stock_frame_baseline[4,1]   = stock_frame_scenario[4,1]   = equil_exp 
+  stock_frame_baseline[1,1] = stock_frame_scenario[1,1] = 0  
+  stock_frame_baseline[2,] = stock_frame_scenario[2] = 0 # constant all years
+  stock_frame_baseline[3,1] = stock_frame_scenario[3,1] = 0
+  stock_frame_baseline[4,1]   = stock_frame_scenario[4,1]   = 0
   stock_frame_baseline[5,1] = stock_frame_scenario[5,1] = index_baseline[1] # we are using lags of weather for stock here, so the scenario uses the same as the baseline for the first year. 
-  stock_frame_baseline[6,]   = stock_frame_scenario[6]   = 11 # constant all years - set to median year of sample. 
-  stock_frame_baseline[7,]   = stock_frame_scenario[7]   = equil_termsTrade # constant all years
+  stock_frame_baseline[6,]   = stock_frame_scenario[6]   = 0 # constant all years - set to median year of sample. 
+  stock_frame_baseline[7,]   = stock_frame_scenario[7]   = 0 # constant all years
   
-  exp_frame_baseline[1,1] = exp_frame_scenario[1,1] = equil_exp 
+  exp_frame_baseline[1,1] = exp_frame_scenario[1,1] = 0 
   exp_frame_baseline[2,] = exp_frame_scenario[2,1] = NA # will enter in after stock is calculated. 
-  exp_frame_baseline[3,1] = exp_frame_scenario[3,1] = equil_grossReturns
-  exp_frame_baseline[4,]   = exp_frame_scenario[4]   = equil_assets # constant all years
+  exp_frame_baseline[3,1] = exp_frame_scenario[3,1] = 0
+  exp_frame_baseline[4,]   = exp_frame_scenario[4]   = 0# constant all years
   exp_frame_baseline[5,1] = exp_frame_scenario[5,1] = index_baseline[1] # we are using lags of weather for exp here, so the scenario uses the same as the baseline for the first year. 
-  exp_frame_baseline[6,]   = exp_frame_scenario[6]   = 11 # constant all years - set to median year of sample. 
-  exp_frame_baseline[7,]   = exp_frame_scenario[7]   = equil_termsTrade # constant all years
+  exp_frame_baseline[6,]   = exp_frame_scenario[6]   = 0 # constant all years - set to median year of sample. 
+  exp_frame_baseline[7,]   = exp_frame_scenario[7]   = 0 # constant all years
   
-  revenue_frame_baseline[1,1] = revenue_frame_scenario[1,1] = equil_grossReturns 
+  revenue_frame_baseline[1,1] = revenue_frame_scenario[1,1] = 0 
   revenue_frame_baseline[2,] = revenue_frame_scenario[2,1] = NA # will enter in after exp is calculated. 
   revenue_frame_baseline[3,] = revenue_frame_scenario[3,1] = NA # will enter in after stock is calculated. 
-  revenue_frame_baseline[4,]   = revenue_frame_scenario[4]   = equil_assets # constant all years
+  revenue_frame_baseline[4,]   = revenue_frame_scenario[4]   = 0 # constant all years
   revenue_frame_baseline[5,1] = index_baseline[1]
   revenue_frame_scenario[5,1] = index_scenario[1] # revenues react to current, not lagged, rainfall (different to inputs) 
-  revenue_frame_baseline[6,]   = revenue_frame_scenario[6]   = 11 # constant all years - set to median year of sample. 
-  revenue_frame_baseline[7,]   = revenue_frame_scenario[7]   = equil_termsTrade # constant all years
+  revenue_frame_baseline[6,]   = revenue_frame_scenario[6]   = 0 # constant all years - set to median year of sample. 
+  revenue_frame_baseline[7,]   = revenue_frame_scenario[7]   = 0 # constant all years
   
   # initialise vvectors to track outcomes, rather than full model matrices. 
   exp_outcomes_baseline = stock_outcomes_baseline = revenue_outcomes_baseline = rep(0, yrs+1)

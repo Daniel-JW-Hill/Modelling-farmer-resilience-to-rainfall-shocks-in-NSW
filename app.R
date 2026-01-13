@@ -15,7 +15,6 @@ library(readxl) # for Arellano Bond coefficients
 source(file.path("utilities", "createRainfallNumeric.R"))
 source(file.path("utilities", "loadData.R"))
 source(file.path("utilities", "getRainfallIndices.R"))
-source(file.path("utilities", 'initialise_frame.R'))
 source(file.path("utilities", "runSimulation.R"))
 source(file.path("utilities", "getSummaryCentral.R"))
 source(file.path("utilities", "runSimulationCI.R"))
