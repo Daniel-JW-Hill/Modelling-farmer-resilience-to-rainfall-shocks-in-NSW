@@ -3,97 +3,126 @@
 # Runs simulation and saves input and output outcomes (as change from mean)
 
 runSimulation = function(yrs,
-                         fitted_exp_baseline,
-                         fitted_stock_baseline,
-                         fitted_revenue_baseline,
-                         fitted_exp_scenario,
-                         fitted_stock_scenario,
-                         fitted_revenue_scenario,
+                         region_select, # input$Region_select
+                         index_baseline,
+                         index_scenario,
                          exp_coefs,
                          stock_coefs, 
-                         revenue_coefs){
+                         revenue_coefs,
+                         levels_grossReturns,
+                         levels_exp,
+                         levels_stock,
+                         levels_assets, 
+                         levels_termsoftrade){
   
-  exp_frame_baseline = initialise_frame(4, yrs+2, c(0, 0, 0, fitted_exp_baseline[1]))
-  exp_frame_scenario = initialise_frame(4, yrs+2, c(0, 0, 0, fitted_exp_scenario[1]))
-  stock_frame_baseline = initialise_frame(7, yrs+2, c(0, 0, 0, 0, 0, 0, fitted_stock_baseline[1]))
-  stock_frame_scenario = initialise_frame(7, yrs+2, c(0, 0, 0, 0, 0, 0, fitted_stock_scenario[1]))
-  revenue_frame_baseline = initialise_frame(7, yrs+2, c(0, 0, 0, 0, 0, 0, fitted_revenue_baseline[1]))
-  revenue_frame_scenario = initialise_frame(7, yrs+2, c(0, 0, 0, 0, 0, 0, fitted_revenue_scenario[1]))
+  #drop years in rainfall index no longer needed
+  index_baseline = na.omit(index_baseline)
+  index_scenario = na.omit(index_scenario)
   
-  exp_outcomes_baseline = stock_outcomes_baseline = revenue_outcomes_baseline = rep(0, yrs)
-  exp_outcomes_scenario = stock_outcomes_scenario = rep(0, yrs)
-  revenue_outcomes_direct_baseline = revenue_outcomes_exp_baseline = revenue_outcomes_stock_baseline = revenue_outcomes_baseline = rep(0, yrs)
-  revenue_outcomes_direct_scenario = revenue_outcomes_exp_scenario = revenue_outcomes_stock_scenario = revenue_outcomes_scenario = rep(0, yrs)
+  # Save coefs as a vector
+  exp_coefs_vec = exp_coefs[,2]
+  stock_coefs_vec = stock_coefs[,2]
+  revenue_coefs_vec = revenue_coefs[,2]
   
+  # Get relevant variable values 
+  equil_grossReturns = log(levels_grossReturns$levels[which(levels_grossReturns$regions == region_select)])
+  equil_exp = log(levels_exp$levels[which(levels_exp$regions == region_select)])
+  equil_stock = log(levels_stock$levels[which(levels_stock$regions == region_select)])
+  equil_assets = log(levels_assets$levels[which(levels_assets$regions == region_select)])
+  equil_termsTrade = levels_termsoftrade$levels[which(levels_termsoftrade$regions == region_select)]
+  
+  #Initialise matrices to save results. 
+  exp_frame_baseline =  matrix(0, nrow = 7, ncol = yrs+1) # first year is the lag year for revenues so we add an extra year.  
+  exp_frame_scenario = matrix(0, nrow = 7, ncol = yrs+1)
+  stock_frame_baseline = matrix(0, nrow = 7, ncol = yrs+1)
+  stock_frame_scenario = matrix(0, nrow = 7, ncol = yrs+1)
+  revenue_frame_baseline = matrix(0, nrow = 7, ncol = yrs+1)
+  revenue_frame_scenario = matrix(0, nrow = 7, ncol = yrs+1)
+  
+  # Pre-fill values into the frames
+  stock_frame_baseline[1,1] = stock_frame_scenario[1,1] = equil_stock  
+  stock_frame_baseline[2,] = stock_frame_scenario[2] = equil_assets # constant all years
+  stock_frame_baseline[3,1] = stock_frame_scenario[3,1] = equil_grossReturns
+  stock_frame_baseline[4,1]   = stock_frame_scenario[4,1]   = equil_exp 
+  stock_frame_baseline[5,1] = stock_frame_scenario[5,1] = index_baseline[1] # we are using lags of weather for stock here, so the scenario uses the same as the baseline for the first year. 
+  stock_frame_baseline[6,]   = stock_frame_scenario[6]   = 11 # constant all years - set to median year of sample. 
+  stock_frame_baseline[7,]   = stock_frame_scenario[7]   = equil_termsTrade # constant all years
+  
+  exp_frame_baseline[1,1] = exp_frame_scenario[1,1] = equil_exp 
+  exp_frame_baseline[2,] = exp_frame_scenario[2,1] = NA # will enter in after stock is calculated. 
+  exp_frame_baseline[3,1] = exp_frame_scenario[3,1] = equil_grossReturns
+  exp_frame_baseline[4,]   = exp_frame_scenario[4]   = equil_assets # constant all years
+  exp_frame_baseline[5,1] = exp_frame_scenario[5,1] = index_baseline[1] # we are using lags of weather for exp here, so the scenario uses the same as the baseline for the first year. 
+  exp_frame_baseline[6,]   = exp_frame_scenario[6]   = 11 # constant all years - set to median year of sample. 
+  exp_frame_baseline[7,]   = exp_frame_scenario[7]   = equil_termsTrade # constant all years
+  
+  revenue_frame_baseline[1,1] = revenue_frame_scenario[1,1] = equil_grossReturns 
+  revenue_frame_baseline[2,] = revenue_frame_scenario[2,1] = NA # will enter in after exp is calculated. 
+  revenue_frame_baseline[3,] = revenue_frame_scenario[3,1] = NA # will enter in after stock is calculated. 
+  revenue_frame_baseline[4,]   = revenue_frame_scenario[4]   = equil_assets # constant all years
+  revenue_frame_baseline[5,1] = index_baseline[1]
+  revenue_frame_scenario[5,1] = index_scenario[1] # revenues react to current, not lagged, rainfall (different to inputs) 
+  revenue_frame_baseline[6,]   = revenue_frame_scenario[6]   = 11 # constant all years - set to median year of sample. 
+  revenue_frame_baseline[7,]   = revenue_frame_scenario[7]   = equil_termsTrade # constant all years
+  
+  # initialise vvectors to track outcomes, rather than full model matrices. 
+  exp_outcomes_baseline = stock_outcomes_baseline = revenue_outcomes_baseline = rep(0, yrs+1)
+  exp_outcomes_scenario = stock_outcomes_scenario = rep(0, yrs+1)
+  revenue_outcomes_direct_baseline = revenue_outcomes_exp_baseline = revenue_outcomes_stock_baseline = revenue_outcomes_baseline = rep(0, yrs+1)
+  revenue_outcomes_direct_scenario = revenue_outcomes_exp_scenario = revenue_outcomes_stock_scenario = revenue_outcomes_scenario = rep(0, yrs+1)
   
   for (y in 1:yrs) {
     
     #### BASELINE ####
-    exp_outcomes_baseline[y] = t(exp_frame_baseline[, y]) %*% as.matrix((exp_coefs))
-    stock_outcomes_baseline[y] = t(stock_frame_baseline[, y]) %*% as.matrix((stock_coefs))
+    stock_outcomes_baseline[y] = t(stock_frame_baseline[, y]) %*% as.matrix((stock_coefs_vec))
+    exp_frame_baseline[2,y] = stock_outcomes_baseline[y]
+    exp_outcomes_baseline[y] = t(exp_frame_baseline[, y]) %*% as.matrix((exp_coefs_vec))
+    revenue_frame_baseline[2,y] = exp_outcomes_baseline[y]
+    revenue_frame_baseline[3,y] = stock_outcomes_baseline[y]
     
-    #populate input decisions for gross revenue outcomes
-    revenue_frame_baseline[3, y] = exp_outcomes_baseline[y]
-    revenue_frame_baseline[4, y] = exp_outcomes_baseline[y] ^ 2
-    revenue_frame_baseline[5, y] = stock_outcomes_baseline[y]
-    revenue_frame_baseline[6, y] = stock_outcomes_baseline[y] ^ 2
-    
-    revenue_outcomes_direct_baseline[y] = revenue_frame_baseline[7, y] %*% as.matrix((revenue_coefs[7]))
-    revenue_outcomes_exp_baseline[y] = revenue_frame_baseline[c(3, 4), y] %*% as.matrix((revenue_coefs[c(3, 4)]))
-    revenue_outcomes_stock_baseline[y] = revenue_frame_baseline[c(5, 6), y] %*% as.matrix((revenue_coefs[c(5, 6)]))
-    revenue_outcomes_baseline[y] = t(revenue_frame_baseline[, y]) %*% as.matrix((revenue_coefs))
+    revenue_outcomes_direct_baseline[y] = revenue_frame_baseline[5, y] %*% as.matrix((revenue_coefs_vec[5,1]))
+    revenue_outcomes_exp_baseline[y] = revenue_frame_baseline[2, y] %*% as.matrix((revenue_coefs_vec[2, 1]))
+    revenue_outcomes_stock_baseline[y] = revenue_frame_baseline[3, y] %*% as.matrix((revenue_coefs_vec[3,1]))
+    revenue_outcomes_baseline[y] = t(revenue_frame_baseline[, y]) %*% as.matrix((revenue_coefs_vec))
     
     #populate matrices for next periods decisions/outcomes
-    exp_frame_baseline[1, y + 1] = revenue_outcomes_baseline[y]
-    exp_frame_baseline[2, y + 1] = exp_outcomes_baseline[y]
-    exp_frame_baseline[3, y + 1] = stock_outcomes_baseline[y]
-    exp_frame_baseline[4, y + 1] = fitted_exp_baseline[y + 1]
+    stock_frame_baseline[1, y+1] = stock_outcomes_baseline[y] 
+    stock_frame_baseline[3, y+1] = revenue_outcomes_baseline[y]
+    stock_frame_baseline[4, y+1] = exp_outcomes_baseline[y]
+    stock_frame_baseline[5, y+1] = index_baseline[y+1] 
+ 
+    exp_frame_baseline[1, y+1] =  exp_outcomes_baseline[y]
+    exp_frame_baseline[3, y+1] =  revenue_outcomes_baseline[y]
+    exp_frame_baseline[5, y+1] = index_baseline[y+1]  
+  
+    revenue_frame_baseline[1,y+1] = revenue_outcomes_baseline[y]
+    revenue_frame_baseline[5,y+1] = index_baseline[y+1]
     
-    stock_frame_baseline[1, y + 1] = revenue_outcomes_baseline[y]
-    stock_frame_baseline[2, y + 2] = revenue_outcomes_baseline[y]
-    stock_frame_baseline[3, y + 1] = exp_outcomes_baseline[y]
-    stock_frame_baseline[4, y + 2] = exp_outcomes_baseline[y]
-    stock_frame_baseline[5, y + 1] = stock_outcomes_baseline[y]
-    stock_frame_baseline[6, y + 2] = stock_outcomes_baseline[y]
-    stock_frame_baseline[7, y + 1] = fitted_stock_baseline[y + 1]
-    
-    revenue_frame_baseline[1, y + 1] = revenue_outcomes_baseline[y]
-    revenue_frame_baseline[2, y + 1] = revenue_outcomes_baseline[y] ^2
-    revenue_frame_baseline[7, y + 1] = fitted_revenue_baseline[y + 1]
     
     #### SCENARIO ####
-    exp_outcomes_scenario[y] = t(exp_frame_scenario[, y]) %*% as.matrix((exp_coefs))
-    stock_outcomes_scenario[y] = t(stock_frame_scenario[, y]) %*% as.matrix((stock_coefs))
+    stock_outcomes_scenario[y] = t(stock_frame_scenario[, y]) %*% as.matrix((stock_coefs_vec))
+    exp_frame_scenario[2,y] = stock_outcomes_scenario[y]
+    exp_outcomes_scenario[y] = t(exp_frame_scenario[, y]) %*% as.matrix((exp_coefs_vec))
+    revenue_frame_scenario[2,y] = exp_outcomes_scenario[y]
+    revenue_frame_scenario[3,y] = stock_outcomes_scenario[y]
     
-    #populate input decisions for gross revenue outcomes
-    revenue_frame_scenario[3, y] = exp_outcomes_scenario[y]
-    revenue_frame_scenario[4, y] = exp_outcomes_scenario[y] ^ 2
-    revenue_frame_scenario[5, y] = stock_outcomes_scenario[y]
-    revenue_frame_scenario[6, y] = stock_outcomes_scenario[y] ^ 2
-    
-    # retrieve decomposition and total outcomes
-    revenue_outcomes_direct_scenario[y] = revenue_frame_scenario[7, y] %*% as.matrix((revenue_coefs[7]))
-    revenue_outcomes_exp_scenario[y] = revenue_frame_scenario[c(3, 4), y] %*% as.matrix((revenue_coefs[c(3, 4)]))
-    revenue_outcomes_stock_scenario[y] = revenue_frame_scenario[c(5, 6), y] %*% as.matrix((revenue_coefs[c(5, 6)]))
-    revenue_outcomes_scenario[y] = t(revenue_frame_scenario[, y]) %*% as.matrix((revenue_coefs))
+    revenue_outcomes_direct_scenario[y] = revenue_frame_scenario[5, y] %*% as.matrix((revenue_coefs_vec[5,1]))
+    revenue_outcomes_exp_scenario[y] = revenue_frame_scenario[2, y] %*% as.matrix((revenue_coefs_vec[2, 1]))
+    revenue_outcomes_stock_scenario[y] = revenue_frame_scenario[3, y] %*% as.matrix((revenue_coefs_vec[3,1]))
+    revenue_outcomes_scenario[y] = t(revenue_frame_scenario[, y]) %*% as.matrix((revenue_coefs_vec))
     
     #populate matrices for next periods decisions/outcomes
-    exp_frame_scenario[1, y + 1] = revenue_outcomes_scenario[y]
-    exp_frame_scenario[2, y + 1] = exp_outcomes_scenario[y]
-    exp_frame_scenario[3, y + 1] = stock_outcomes_scenario[y]
-    exp_frame_scenario[4, y + 1] = fitted_exp_scenario[y + 1]
+    stock_frame_scenario[1, y+1] = stock_outcomes_scenario[y] 
+    stock_frame_scenario[3, y+1] = revenue_outcomes_scenario[y]
+    stock_frame_scenario[4, y+1] = exp_outcomes_scenario[y]
+    stock_frame_scenario[5, y+1] = index_scenario[y+1] 
     
-    stock_frame_scenario[1, y + 1] = revenue_outcomes_scenario[y]
-    stock_frame_scenario[2, y + 2] = revenue_outcomes_scenario[y]
-    stock_frame_scenario[3, y + 1] = exp_outcomes_scenario[y]
-    stock_frame_scenario[4, y + 2] = exp_outcomes_scenario[y]
-    stock_frame_scenario[5, y + 1] = stock_outcomes_scenario[y]
-    stock_frame_scenario[6, y + 2] = stock_outcomes_scenario[y]
-    stock_frame_scenario[7, y + 1] = fitted_stock_scenario[y + 1]
+    exp_frame_scenario[1, y+1] =  exp_outcomes_scenario[y]
+    exp_frame_scenario[3, y+1] =  revenue_outcomes_scenario[y]
+    exp_frame_scenario[5, y+1] = index_scenario[y+1]  
     
-    revenue_frame_scenario[1, y + 1] = revenue_outcomes_scenario[y]
-    revenue_frame_scenario[2, y + 1] = revenue_outcomes_scenario[y] ^ 2
-    revenue_frame_scenario[7, y + 1] = fitted_revenue_scenario[y + 1]
+    revenue_frame_scenario[1,y+1] = revenue_outcomes_scenario[y]
+    revenue_frame_scenario[5,y+1] = index_scenario[y+1]
   }
   
   return(list(exp_outcomes_baseline = exp_outcomes_baseline,

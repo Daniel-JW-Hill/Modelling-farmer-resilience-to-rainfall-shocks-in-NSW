@@ -430,12 +430,8 @@ server <- function(input, output, session) {
       
       # Estimate Central Outcomes
       central_simulation  = runSimulation(yrs,
-                                          fitted_exp_baseline,
-                                          fitted_stock_baseline,
-                                          fitted_revenue_baseline,
-                                          fitted_exp_scenario,
-                                          fitted_stock_scenario,
-                                          fitted_revenue_scenario,
+                                          index_baseline,
+                                          index_scenario,
                                           exp_coefs,
                                           stock_coefs, 
                                           revenue_coefs)
