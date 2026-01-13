@@ -75,18 +75,19 @@ runSimulation = function(yrs,
     revenue_outcomes_baseline[y] = t(revenue_frame_baseline[, y]) %*% as.matrix((revenue_coefs_vec))
     
     #populate matrices for next periods decisions/outcomes
-    stock_frame_baseline[1, y+1] = stock_outcomes_baseline[y] 
-    stock_frame_baseline[3, y+1] = revenue_outcomes_baseline[y]
-    stock_frame_baseline[4, y+1] = exp_outcomes_baseline[y]
-    stock_frame_baseline[5, y+1] = index_baseline[y+1] 
- 
-    exp_frame_baseline[1, y+1] =  exp_outcomes_baseline[y]
-    exp_frame_baseline[3, y+1] =  revenue_outcomes_baseline[y]
-    exp_frame_baseline[5, y+1] = index_baseline[y+1]  
-  
-    revenue_frame_baseline[1,y+1] = revenue_outcomes_baseline[y]
-    revenue_frame_baseline[5,y+1] = index_baseline[y+1]
-    
+    if (y < yrs) {
+      stock_frame_baseline[1, y+1] = stock_outcomes_baseline[y] 
+      stock_frame_baseline[3, y+1] = revenue_outcomes_baseline[y]
+      stock_frame_baseline[4, y+1] = exp_outcomes_baseline[y]
+      stock_frame_baseline[5, y+1] = index_baseline[y+1] 
+      
+      exp_frame_baseline[1, y+1] =  exp_outcomes_baseline[y]
+      exp_frame_baseline[3, y+1] =  revenue_outcomes_baseline[y]
+      exp_frame_baseline[5, y+1] = index_baseline[y+1]  
+      
+      revenue_frame_baseline[1,y+1] = revenue_outcomes_baseline[y]
+      revenue_frame_baseline[5,y+1] = index_baseline[y+1]
+    }
     
     #### SCENARIO ####
     stock_outcomes_scenario[y] = t(stock_frame_scenario[, y]) %*% as.matrix((stock_coefs_vec))
@@ -101,17 +102,19 @@ runSimulation = function(yrs,
     revenue_outcomes_scenario[y] = t(revenue_frame_scenario[, y]) %*% as.matrix((revenue_coefs_vec))
     
     #populate matrices for next periods decisions/outcomes
-    stock_frame_scenario[1, y+1] = stock_outcomes_scenario[y] 
-    stock_frame_scenario[3, y+1] = revenue_outcomes_scenario[y]
-    stock_frame_scenario[4, y+1] = exp_outcomes_scenario[y]
-    stock_frame_scenario[5, y+1] = index_scenario[y+1] 
-    
-    exp_frame_scenario[1, y+1] =  exp_outcomes_scenario[y]
-    exp_frame_scenario[3, y+1] =  revenue_outcomes_scenario[y]
-    exp_frame_scenario[5, y+1] = index_scenario[y+1]  
-    
-    revenue_frame_scenario[1,y+1] = revenue_outcomes_scenario[y]
-    revenue_frame_scenario[5,y+1] = index_scenario[y+1]
+    if (y < yrs) {
+      stock_frame_scenario[1, y+1] = stock_outcomes_scenario[y] 
+      stock_frame_scenario[3, y+1] = revenue_outcomes_scenario[y]
+      stock_frame_scenario[4, y+1] = exp_outcomes_scenario[y]
+      stock_frame_scenario[5, y+1] = index_scenario[y+1] 
+      
+      exp_frame_scenario[1, y+1] =  exp_outcomes_scenario[y]
+      exp_frame_scenario[3, y+1] =  revenue_outcomes_scenario[y]
+      exp_frame_scenario[5, y+1] = index_scenario[y+1]  
+      
+      revenue_frame_scenario[1,y+1] = revenue_outcomes_scenario[y]
+      revenue_frame_scenario[5,y+1] = index_scenario[y+1] 
+    }
   }
   
   return(list(exp_outcomes_baseline = exp_outcomes_baseline,

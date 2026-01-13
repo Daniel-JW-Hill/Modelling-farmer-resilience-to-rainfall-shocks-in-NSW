@@ -5,15 +5,8 @@ runSimulationCI = function(yrs,
                            exp_coefs, 
                            stock_coefs,
                            revenue_coefs,
-                           exp_sd,
-                           stock_sd, 
-                           revenue_sd,
-                           fitted_exp_baseline,
-                           fitted_stock_baseline,
-                           fitted_revenue_baseline,
-                           fitted_exp_scenario,
-                           fitted_stock_scenario,
-                           fitted_revenue_scenario,
+                           index_baseline,
+                           index_scenario,
                            Region_select, 
                            levels_grossReturns, 
                            levels_exp, 
@@ -21,6 +14,7 @@ runSimulationCI = function(yrs,
                            min_b,
                            max_b){
   
+  # set up frames. 
   bb = 500 # number of draws.
   exp_outcomes_scenario_diff_ls = exp_outcomes_scenario_ls = list()
   stock_outcomes_scenario_diff_ls = stock_outcomes_scenario_ls = list()
@@ -30,36 +24,45 @@ runSimulationCI = function(yrs,
   revenue_outcomes_scenario_diff_ls = revenue_outcomes_scenario_ls = list()
   EBITDA_outcomes_scenario_diff_ls  = list()
   
-  exp_coefs_b = exp_coefs
-  stock_coefs_b = stock_coefs
-  revenue_coefs_b = revenue_coefs
+  exp_coefs_vec = exp_coefs[,2]
+  stock_coefs_vec = stock_coefs[,2]
+  revenue_coefs_vec = revenue_coefs[,2]
+  
+  exp_sd = exp_coefs[,3]
+  stock_sd = stock_coefs[,3]
+  revenue_sd = revenue_coefs[,3]
+  
+  exp_coefs_mat = exp_coefs
+  stock_coefs_mat = stock_coefs
+  revenue_coefs_mat = revenue_coefs
   
   for (b in 1:bb) {
     
     #redraw coefficients
     exp_coefs_b = mapply(rnorm,
                          n = 1,
-                         mean = exp_coefs,
+                         mean = exp_coefs_vec,
                          sd = exp_sd)
     stock_coefs_b = mapply(rnorm,
                            n = 1,
-                           mean = stock_coefs,
+                           mean = stock_coefs_vec,
                            sd = stock_sd)
     revenue_coefs_b = mapply(rnorm,
                              n = 1,
-                             mean = revenue_coefs,
+                             mean = revenue_coefs_vec,
                              sd = revenue_sd)
     
+    exp_coefs_mat[,2] = exp_coefs_b
+    stock_coefs_mat[,2] = stock_coefs_b
+    revenue_coefs_mat[,2] = revenue_coefs_b
+    
     results = runSimulation(yrs,
-                            fitted_exp_baseline,
-                            fitted_stock_baseline,
-                            fitted_revenue_baseline,
-                            fitted_exp_scenario,
-                            fitted_stock_scenario,
-                            fitted_revenue_scenario,
-                            exp_coefs_b,
-                            stock_coefs_b, 
-                            revenue_coefs_b)
+                            Region_select,
+                            index_baseline,
+                            index_scenario,
+                            exp_coefs_mat,
+                            stock_coefs_mat, 
+                            revenue_coefs_mat)
     
     exp_outcomes_baseline = results$exp_outcomes_baseline
     exp_outcomes_scenario =  results$exp_outcomes_scenario 
@@ -76,7 +79,6 @@ runSimulationCI = function(yrs,
     
     
     # Add levels back into estimates
-    
     exp_outcomes_baseline = exp_outcomes_baseline + log(levels_exp$levels[levels_exp$regions == Region_select])
     stock_outcomes_baseline = stock_outcomes_baseline + log(levels_stock$levels[levels_stock$regions == Region_select])
     revenue_outcomes_direct_baseline = revenue_outcomes_direct_baseline + log(levels_grossReturns$levels[levels_grossReturns$regions == Region_select])
