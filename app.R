@@ -405,7 +405,7 @@ server <- function(input, output, session) {
       
       # Retrieve data for relevant region. 
       data_files = loadData(input$Region_select)
-      gams = data_files[[1]]
+      gams_path = data_files[[1]]
       exp_coefs = data_files[[2]]
       stock_coefs = data_files[[3]]
       revenue_coefs = data_files[[4]]
@@ -414,7 +414,7 @@ server <- function(input, output, session) {
       
       # Retrieve weather indices for simulation
       rainfall_indices = getRainfallIndices(yrs, 
-                                            gams, 
+                                            gams_path, 
                                             input$spi_t4, 
                                             input$spi_t3,
                                             input$spi_t2,

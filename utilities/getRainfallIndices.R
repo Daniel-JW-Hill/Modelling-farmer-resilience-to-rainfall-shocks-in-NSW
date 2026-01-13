@@ -3,13 +3,21 @@
 # Retrieves the estimated GAMs results given the realisation of rainfall. 
 
 getRainfallIndices = function(yrs, 
-                              gams, 
+                              gams_path, 
                               spi_t4, 
                               spi_t3,
                               spi_t2,
                               spi_t1,
                               spi_current,
                               spi_lead){
+  
+  
+  #Load single version of GAMs data to get unique values 
+  rainfall_data_dummy = load(file.path("GAMs_Data", paste(gams_path, 1, 'simulated_data.RData', sep = "_")))
+  #sort lag 4 for unique
+  #drop dummy
+  #get baseline :)
+  #then we can dynamically load the data based on which current period we have, find and drop. 
   
   rainfall_options = sort(unique(gams$SPI)) # simulated data options
   rainfall_index_baseline = min(abs(rainfall_options)) # 'typical' conditions - as close as zero as possible for all years
