@@ -73,7 +73,7 @@ min_b = 0.05
 max_b = 0.95
 
 # Time period for impulse. 
-yrs = 20 # min of 10 years. 
+yrs = 15  
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -181,7 +181,7 @@ ui <- fluidPage(
             choices = list(
               "Central West" = 'Central West',
               "Far West" = 'Far West',
-              "Murray-Riverina" = 'Murray and Riverina',
+              "Murray & Riverina" = 'Murray & Riverina',
               "Northern Tablelands" = 'Northern Tablelands'
             ),
             selected = 'Central_West'
@@ -402,6 +402,24 @@ server <- function(input, output, session) {
       max_b
     )
     
+    # check boundary conditions on user inputs
+    if (any(input$spi_t4 < -0.75,
+            input$spi_t3 < -0.75,
+            input$spi_t2 < -0.75,
+            input$spi_t1 < -0.75,
+            input$spi_current < -0.75,
+            input$spi_lead < -0.75,
+            input$spi_t4 > 1,
+            input$spi_t3 > 1,
+            input$spi_t2 > 1,
+            input$spi_t1 > 1,
+            input$spi_current > 1,
+            input$spi_lead > 1)){
+      showNotification("SPI values must be between -0.75 (driest) or 1 (wettest)", type = "error")
+      return()
+    }
+    
+    
     disable('runSimulation')
     updateActionButton(
       session = session,
@@ -409,7 +427,6 @@ server <- function(input, output, session) {
       label = "Simulation in progress",
       icon = icon("sync", class = "fa-spin")
     )
-    
       
       # Retrieve data for relevant region. 
       data_files = loadData(input$Region_select)
@@ -418,7 +435,6 @@ server <- function(input, output, session) {
       stock_coefs = data_files[[3]]
       revenue_coefs = data_files[[4]]
       rm(data_files)
-      
       
       # Retrieve weather indices for simulation
       rainfall_indices = getRainfallIndices(yrs, 
@@ -440,9 +456,9 @@ server <- function(input, output, session) {
       central_simulation  = runSimulation(yrs,
                                           index_baseline,
                                           index_scenario,
-                                          exp_coefficients,
-                                          stock_coefficients, 
-                                          revenue_coefficients)
+                                          exp_coefs,
+                                          stock_coefs, 
+                                          revenue_coefs)
       
       # save central results and get baseline results. 
       summary_central = getSummaryCentral(yrs, 
@@ -485,7 +501,7 @@ server <- function(input, output, session) {
         need(!is.null(summary_upper), "CI upper bound missing")
       )
       
-      #Save dataframes for ggplot.
+      #Save data-frames for ggplot.
       data_inputs = data.frame(
         Year = 1:nrow(summary_central),
         Type = rep(c("ExpOutcomes", "StockOutcomes"), each = yrs+1),

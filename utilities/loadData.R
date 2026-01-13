@@ -15,7 +15,7 @@ loadData = function(Region_select){
     Region_select,
     "Central West" = "CentralWest",
     "Far West" = "FarWest",
-    "Murray-Riverina" = "MurrayRiverina",
+    "Murray & Riverina" = "MurrayRiverina",
     "Northern Tablelands" = "NorthernTablelands",
     stop("No region selected")
   )
@@ -27,7 +27,7 @@ loadData = function(Region_select){
     Region_select,
     "Central West" = "Central_West",
     "Far West" = "Far_West",
-    "Murray-Riverina" = "Murray_Riverina",
+    "Murray & Riverina" = "Murray_Riverina",
     "Northern Tablelands" = "Northern_Tablelands",
     stop("No region selected")
   )

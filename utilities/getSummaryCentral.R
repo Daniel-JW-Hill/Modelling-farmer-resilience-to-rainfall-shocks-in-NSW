@@ -14,7 +14,7 @@ getSummaryCentral = function(yrs,
     Region_select,
     "Central West" = "Central_West",
     "Far West" = "Far_West",
-    "Murray-Riverina" = "Murray_Riverina",
+    "Murray & Riverina" = "Murray_Riverina",
     "Northern Tablelands" = "Northern_Tablelands",
     stop("No region selected")
   )
