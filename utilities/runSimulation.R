@@ -18,7 +18,6 @@ runSimulation = function(yrs,
   stock_coefs_vec = stock_coefs[,2]
   revenue_coefs_vec = revenue_coefs[,2]
   
-
   #Initialise matrices to save results. 
   exp_frame_baseline =  matrix(0, nrow = 7, ncol = yrs+1) # first year is the lag year for revenues so we add an extra year.  
   exp_frame_scenario = matrix(0, nrow = 7, ncol = yrs+1)
@@ -37,7 +36,7 @@ runSimulation = function(yrs,
   stock_frame_baseline[7,]   = stock_frame_scenario[7]   = 0 # constant all years
   
   exp_frame_baseline[1,1] = exp_frame_scenario[1,1] = 0 
-  exp_frame_baseline[2,] = exp_frame_scenario[2,1] = NA # will enter in after stock is calculated. 
+  exp_frame_baseline[2,] = exp_frame_scenario[2,] = 0 # will enter in after stock is calculated. 
   exp_frame_baseline[3,1] = exp_frame_scenario[3,1] = 0
   exp_frame_baseline[4,]   = exp_frame_scenario[4]   = 0# constant all years
   exp_frame_baseline[5,1] = exp_frame_scenario[5,1] = index_baseline[1] # we are using lags of weather for exp here, so the scenario uses the same as the baseline for the first year. 
@@ -45,8 +44,8 @@ runSimulation = function(yrs,
   exp_frame_baseline[7,]   = exp_frame_scenario[7]   = 0 # constant all years
   
   revenue_frame_baseline[1,1] = revenue_frame_scenario[1,1] = 0 
-  revenue_frame_baseline[2,] = revenue_frame_scenario[2,1] = NA # will enter in after exp is calculated. 
-  revenue_frame_baseline[3,] = revenue_frame_scenario[3,1] = NA # will enter in after stock is calculated. 
+  revenue_frame_baseline[2,] = revenue_frame_scenario[2,] = 0 # will enter in after exp is calculated. 
+  revenue_frame_baseline[3,] = revenue_frame_scenario[3,] = 0 # will enter in after stock is calculated. 
   revenue_frame_baseline[4,]   = revenue_frame_scenario[4]   = 0 # constant all years
   revenue_frame_baseline[5,1] = index_baseline[1]
   revenue_frame_scenario[5,1] = index_scenario[1] # revenues react to current, not lagged, rainfall (different to inputs) 
@@ -78,11 +77,11 @@ runSimulation = function(yrs,
       stock_frame_baseline[1, y+1] = stock_outcomes_baseline[y] 
       stock_frame_baseline[3, y+1] = revenue_outcomes_baseline[y]
       stock_frame_baseline[4, y+1] = exp_outcomes_baseline[y]
-      stock_frame_baseline[5, y+1] = index_baseline[y+1] 
+      stock_frame_baseline[5, y+1] = index_baseline[y] 
       
       exp_frame_baseline[1, y+1] =  exp_outcomes_baseline[y]
       exp_frame_baseline[3, y+1] =  revenue_outcomes_baseline[y]
-      exp_frame_baseline[5, y+1] = index_baseline[y+1]  
+      exp_frame_baseline[5, y+1] = index_baseline[y]  
       
       revenue_frame_baseline[1,y+1] = revenue_outcomes_baseline[y]
       revenue_frame_baseline[5,y+1] = index_baseline[y+1]
@@ -105,11 +104,11 @@ runSimulation = function(yrs,
       stock_frame_scenario[1, y+1] = stock_outcomes_scenario[y] 
       stock_frame_scenario[3, y+1] = revenue_outcomes_scenario[y]
       stock_frame_scenario[4, y+1] = exp_outcomes_scenario[y]
-      stock_frame_scenario[5, y+1] = index_scenario[y+1] 
+      stock_frame_scenario[5, y+1] = index_scenario[y] 
       
       exp_frame_scenario[1, y+1] =  exp_outcomes_scenario[y]
       exp_frame_scenario[3, y+1] =  revenue_outcomes_scenario[y]
-      exp_frame_scenario[5, y+1] = index_scenario[y+1]  
+      exp_frame_scenario[5, y+1] = index_scenario[y]  
       
       revenue_frame_scenario[1,y+1] = revenue_outcomes_scenario[y]
       revenue_frame_scenario[5,y+1] = index_scenario[y+1] 

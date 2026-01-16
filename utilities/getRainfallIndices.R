@@ -58,7 +58,7 @@ getRainfallIndices = function(yrs,
                                               rainfall_data$SPIL2 ==  rainfall_index_scenario[y+2] & 
                                               rainfall_data$SPIL1 == rainfall_index_scenario[y+3] & 
                                               rainfall_data$SPICurrent == rainfall_index_scenario[y+4] & 
-                                              rainfall_data$SPILead == rainfall_index_scenario[y+5]] # finds corresponding rainfall index given historical rainfall
+                                              rainfall_data$SPILead == rainfall_index_baseline] # finds corresponding rainfall index given historical rainfall. Ignore lead var for expectations. 
 }
   
   return(list(rainfall_index_baseline, 
