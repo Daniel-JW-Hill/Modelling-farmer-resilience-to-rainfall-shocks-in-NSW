@@ -371,7 +371,17 @@ server <- function(input, output, session) {
   # retrieve boundaries for plot based on analysis region
   boundaries = reactive({
     req(input$Region_select)
-    boundary_row = which(boundaries_no_coastal$labels == input$Region_select)
+    
+    region_idx = switch(
+      input$Region_select,
+      "Central West" = "Central West",
+      "Far West" = "Far West",
+      "Murray & Riverina" = "Murray and Riverina",
+      "Northern Tablelands" = "Northern Tablelands",
+      stop("No region selected")
+    )
+    
+    boundary_row = which(boundaries_no_coastal$labels == region_idx)
     boundaries_filtered = boundaries_no_coastal[c(1, boundary_row), ]
     return(boundaries_filtered)
   })
@@ -379,8 +389,18 @@ server <- function(input, output, session) {
   # plot map
   output$map = renderPlot({
     req(boundaries())
+    
+    region_idx = switch(
+      input$Region_select,
+      "Central West" = "Central West",
+      "Far West" = "Far West",
+      "Murray & Riverina" = "Murray and Riverina",
+      "Northern Tablelands" = "Northern Tablelands",
+      stop("No region selected")
+    )
+    
     fill_colors = c("NSW" = "white")
-    fill_colors[input$Region_select] = "#4682B4"
+    fill_colors[region_idx] = "#4682B4"
     
     ggplot(boundaries()) +
       geom_sf(aes(fill = labels)) +
@@ -402,19 +422,68 @@ server <- function(input, output, session) {
       max_b
     )
     
+    # define spi indices
+    if (is.null(input$spi_t4)){
+      spi_t4 = 0
+    } else if (is.na(input$spi_t4)){
+      spi_t4 = 0
+    } else {
+      spi_t4 = input$spi_t4
+    }
+    
+    if (is.null(input$spi_t3)){
+      spi_t3 = 0
+    } else if (is.na(input$spi_t3)){
+      spi_t3 = 0
+    } else {
+      spi_t3 = input$spi_t3
+    }
+    
+    if (is.null(input$spi_t2)){
+      spi_t2 = 0
+    } else if (is.na(input$spi_t2)){
+      spi_t2 = 0
+    } else {
+      spi_t2 = input$spi_t2
+    }
+    
+    if (is.null(input$spi_t1)){
+      spi_t1 = 0
+    } else if (is.na(input$spi_t1)){
+      spi_t1 = 0
+    } else {
+      spi_t1 = input$spi_t1
+    }
+    
+    if (is.null(input$spi_current)){
+      spi_current = 0
+    } else if (is.na(input$spi_current)){
+      spi_current = 0
+    } else {
+      spi_current = input$spi_current
+    }
+    
+    if (is.null(input$spi_lead)){
+      spi_lead = 0
+    } else if (is.na(input$spi_lead)){
+      spi_lead = 0
+    } else {
+      spi_lead = 0 # force to zero to make the simulation more intuitive (ignores expectations)
+    }
+    
     # check boundary conditions on user inputs
-    if (any(input$spi_t4 < -0.75,
-            input$spi_t3 < -0.75,
-            input$spi_t2 < -0.75,
-            input$spi_t1 < -0.75,
-            input$spi_current < -0.75,
-            input$spi_lead < -0.75,
-            input$spi_t4 > 1,
-            input$spi_t3 > 1,
-            input$spi_t2 > 1,
-            input$spi_t1 > 1,
-            input$spi_current > 1,
-            input$spi_lead > 1)){
+    if (any(spi_t4 < -0.75,
+            spi_t3 < -0.75,
+            spi_t2 < -0.75,
+            spi_t1 < -0.75,
+            spi_current < -0.75,
+            spi_lead < -0.75,
+            spi_t4 > 1,
+            spi_t3 > 1,
+            spi_t2 > 1,
+            spi_t1 > 1,
+            spi_current > 1,
+            spi_lead > 1)){
       showNotification("SPI values must be between -0.75 (driest) or 1 (wettest)", type = "error")
       return()
     }
@@ -439,12 +508,12 @@ server <- function(input, output, session) {
       # Retrieve weather indices for simulation
       rainfall_indices = getRainfallIndices(yrs, 
                                             gams_path, 
-                                            input$spi_t4, 
-                                            input$spi_t3,
-                                            input$spi_t2,
-                                            input$spi_t1,
-                                            input$spi_current,
-                                            input$spi_lead)
+                                            spi_t4, 
+                                            spi_t3,
+                                            spi_t2,
+                                            spi_t1,
+                                            spi_current,
+                                            spi_lead)
       
       rainfall_index_baseline = rainfall_indices[[1]] #normal conditions, in SPI,  in a vector
       rainfall_index_scenario = rainfall_indices[[2]] #chosen SPI values in a vector

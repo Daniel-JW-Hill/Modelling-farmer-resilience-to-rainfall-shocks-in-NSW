@@ -13,11 +13,11 @@ getRainfallIndices = function(yrs,
   
   
   #Load single version of GAMs data to get unique values 
-  load(file.path("GAMs_Data", paste(gams_path, 1, 'expandedgrid_SPI.RData', sep = "_")))
-  rainfall_data_dummy = subset
-  rm(subset)
-  rainfall_options = sort(unique(rainfall_data_dummy$SPIL4))
-  rm(rainfall_data_dummy)
+  load(file.path("GAMs_Data", paste("pred_SPI", gams_path, ".RData", sep = "_")))
+  rainfall_data = pred_vals_long
+  rm(pred_vals_long)
+  rainfall_options = sort(unique(rainfall_data$SPI))
+  constant = rainfall_data$constant[1]
 
   rainfall_index_baseline_idx = which.min(abs(rainfall_options)) # 'typical' conditions - as close as zero as possible for all years
   rainfall_index_baseline = rainfall_options[rainfall_index_baseline_idx]
@@ -33,32 +33,23 @@ getRainfallIndices = function(yrs,
  # remaining years assumed 'normal' conditions as we are modelling resilience for 'current' year. 
   
   index_baseline = index_scenario = rep(NA, yrs + 5) # lag + lead years added in. NA years will be dropped anyway. 
-  
-  load(file.path("GAMs_Data", paste(gams_path, rainfall_index_baseline_idx, 'expandedgrid_SPI.RData', sep = "_")))
-  rainfall_data_normal = subset
-  rm(subset)
-  index_normal = rainfall_data_normal$y_hat[rainfall_data_normal$SPIL4 == rainfall_index_baseline & 
-                                            rainfall_data_normal$SPIL3 == rainfall_index_baseline & 
-                                            rainfall_data_normal$SPIL2 ==  rainfall_index_baseline & 
-                                            rainfall_data_normal$SPIL1 == rainfall_index_baseline & 
-                                            rainfall_data_normal$SPICurrent == rainfall_index_baseline & 
-                                            rainfall_data_normal$SPILead == rainfall_index_baseline]
-  rm(rainfall_data_normal)
+  index_normal = sum(c(rainfall_data$predictions[which(rainfall_data$SPI == rainfall_index_baseline & rainfall_data$lag == "L4")],
+                       rainfall_data$predictions[which(rainfall_data$SPI == rainfall_index_baseline & rainfall_data$lag == "L3")],
+                       rainfall_data$predictions[which(rainfall_data$SPI == rainfall_index_baseline & rainfall_data$lag == "L2")],
+                       rainfall_data$predictions[which(rainfall_data$SPI == rainfall_index_baseline & rainfall_data$lag == "L1")],
+                       rainfall_data$predictions[which(rainfall_data$SPI == rainfall_index_baseline & rainfall_data$lag == "L0")],
+                       rainfall_data$predictions[which(rainfall_data$SPI == rainfall_index_baseline & rainfall_data$lag == "LEAD")],
+                       constant))
   
   for (y in 1:(yrs)) { 
     index_baseline[y+4] = index_normal
-    
-    rainfall_index_scenario_idx  = which(rainfall_options == rainfall_index_scenario[y+4]) # what is the current year's rainfall realisation
-    load(file.path("GAMs_Data", paste(gams_path, rainfall_index_scenario_idx, 'expandedgrid_SPI.RData', sep = "_"))) # load data
-    rainfall_data = subset
-    rm(subset)
-    
-    index_scenario[y+4] = rainfall_data$y_hat[rainfall_data$SPIL4 == rainfall_index_scenario[y] & 
-                                              rainfall_data$SPIL3 == rainfall_index_scenario[y+1] & 
-                                              rainfall_data$SPIL2 ==  rainfall_index_scenario[y+2] & 
-                                              rainfall_data$SPIL1 == rainfall_index_scenario[y+3] & 
-                                              rainfall_data$SPICurrent == rainfall_index_scenario[y+4] & 
-                                              rainfall_data$SPILead == rainfall_index_baseline] # finds corresponding rainfall index given historical rainfall. Ignore lead var for expectations. 
+    index_scenario[y+4] = sum(c(rainfall_data$predictions[which(rainfall_data$SPI == rainfall_index_scenario[y] & rainfall_data$lag == "L4")],
+                                rainfall_data$predictions[which(rainfall_data$SPI == rainfall_index_scenario[y+1] & rainfall_data$lag == "L3")],
+                                rainfall_data$predictions[which(rainfall_data$SPI == rainfall_index_scenario[y+2] & rainfall_data$lag == "L2")],
+                                rainfall_data$predictions[which(rainfall_data$SPI == rainfall_index_scenario[y+3] & rainfall_data$lag == "L1")],
+                                rainfall_data$predictions[which(rainfall_data$SPI == rainfall_index_scenario[y+4] & rainfall_data$lag == "L0")],
+                                rainfall_data$predictions[which(rainfall_data$SPI == rainfall_index_scenario[y+5] & rainfall_data$lag == "LEAD")],
+                                constant))
 }
   
   return(list(rainfall_index_baseline, 
